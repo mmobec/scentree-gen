@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -29,11 +29,8 @@ dev = [
 [tool.setuptools]
 include-package-data = true
 
-[tool.setuptools.package-data]
-"data" = ["**/*.csv"]
-
 [tool.setuptools.packages.find]
-where = ["."]
+include = ["scentree_gen*"]
 
 [tool.black]
 line-length = 100
