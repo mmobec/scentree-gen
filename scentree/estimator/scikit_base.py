@@ -9,6 +9,7 @@ from typing import Any, Dict, Type, TypeVar, Union
 
 R = TypeVar("R", bound="SklearnEstimator")
 
+
 class SklearnEstimator(BaseEstimator):
     """Wrapper class for Scikit-learn estimators.
 
@@ -28,26 +29,13 @@ class SklearnEstimator(BaseEstimator):
         hyperparameters_space (Dict[str, List[Any]]): Dictionary defining the search space
             for hyperparameters.
     """
+
     def __init__(self, estimator_class: Type[Any]):
-        """Initialize the SklearnEstimator wrapper.
-
-        Args:
-            estimator_class (Type[Any]): A Scikit-learn estimator class
-                that implements `fit` and `predict` methods (e.g., `sklearn.linear_model.Ridge`).
-
-        Initializes:
-            self.estimator_class: Stores the provided estimator class.
-            self.name: Stores the class name of the estimator.
-            self.hyperparameters: Populated with the estimator's default hyperparameters.
-            self.hyperparameters_space: Populated with the estimator's hyperparameter search space.
-            self.estimator: Initially None; set after calling `fit()`.
-        """
         self.estimator = None
         self.estimator_class = estimator_class
         self.name = self.estimator_class.__name__
         self.hyperparameters = get_default_parameters(estimator_class)
         self.hyperparameters_space = get_hyperparameters_space(self.name)
-
 
     def fit(self: R, X: np.ndarray, y: np.ndarray) -> R:
         """Fit the wrapped Scikit-learn estimator to the training data.
@@ -57,7 +45,7 @@ class SklearnEstimator(BaseEstimator):
             y (np.ndarray): Target vector.
 
         Returns:
-            SklearnEstimator: The fitted wrapper instance.
+            R: The fitted wrapper instance.
         """
 
         self.estimator = self.estimator_class(**self.hyperparameters)
@@ -79,7 +67,6 @@ class SklearnEstimator(BaseEstimator):
         if self.estimator is None:
             raise RuntimeError("You must call `fit()` before `predict()`.")
         return self.estimator.predict(X)
-
 
     def get_params(self, deep: bool = True) -> Dict[str, Any]:
         """Return the hyperparameters of the estimator.
@@ -104,7 +91,7 @@ class SklearnEstimator(BaseEstimator):
             **params: Arbitrary keyword arguments of hyperparameters to update.
 
         Returns:
-            SklearnEstimator: The updated estimator instance.
+            R: The updated estimator instance (same type as self).
         """
         for key, value in params.items():
             if hasattr(self, key):
@@ -146,14 +133,13 @@ class SklearnEstimator(BaseEstimator):
         else:
             cv_splitter = cv
 
-
         # Create GridSearchCV
         grid = GridSearchCV(
             estimator=self.estimator_class(),
             param_grid=self.hyperparameters_space,
             scoring=scorer,
             cv=cv_splitter,
-            n_jobs=-1
+            n_jobs=-1,
         )
 
         # Fit the grid search
@@ -162,5 +148,5 @@ class SklearnEstimator(BaseEstimator):
         # Instantiate and fit the best estimator
         best_estimator = self.estimator_class(**grid.best_params_)
         best_estimator.fit(X, y)
-        
+
         return best_estimator
