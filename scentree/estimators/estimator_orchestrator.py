@@ -1,7 +1,7 @@
 import numpy as np
 from pydantic import BaseModel
-from scentree.estimator.ridge import RidgeEstimator
-from scentree.estimator.var import VarEstimator
+from scentree.estimators.ridge import RidgeEstimator
+from scentree.estimators.var import VarEstimator
 from sklearn.model_selection import BaseCrossValidator
 from typing import Any, ClassVar, List, Optional, Protocol, Self, Type, TypeVar, Union
 

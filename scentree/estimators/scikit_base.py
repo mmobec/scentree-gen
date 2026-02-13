@@ -1,5 +1,5 @@
 import numpy as np
-from scentree.estimator.utils import get_default_parameters, get_hyperparameters_space
+from scentree.estimators.utils import get_default_parameters, get_hyperparameters_space
 from scentree.metrics.rmse import rmse
 from sklearn.base import BaseEstimator
 from sklearn.metrics import make_scorer

@@ -1,4 +1,4 @@
-from scentree.estimator.scikit_base import SklearnEstimator
+from scentree.estimators.scikit_base import SklearnEstimator
 from sklearn.base import BaseEstimator
 from sklearn.linear_model import Ridge
 from typing import Optional, Type

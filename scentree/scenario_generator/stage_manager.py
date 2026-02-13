@@ -2,7 +2,7 @@ import numpy as np
 from pydantic import BaseModel
 from scentree.config import explained_var
 from scentree.dim_reduction.pca import BasePCA
-from scentree.estimator.estimator_orchestrator import EstimatorController
+from scentree.estimators.estimator_orchestrator import EstimatorController
 from sklearn.preprocessing import StandardScaler
 from typing import List, Optional
 

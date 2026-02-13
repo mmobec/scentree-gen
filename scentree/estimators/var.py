@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 import itertools
-from scentree.estimator.utils import get_default_parameters, get_hyperparameters_space
+from scentree.estimators.utils import get_default_parameters, get_hyperparameters_space
 from scentree.metrics.rmse import rmse
 from statsmodels.tsa.vector_ar.var_model import VAR, VARResultsWrapper
 from sklearn.model_selection import BaseCrossValidator, TimeSeriesSplit
