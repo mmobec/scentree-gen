@@ -1,1 +1,0 @@
-from scentree.scenario_generator.generator import ScenarioGenerator
