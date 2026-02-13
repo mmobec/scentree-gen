@@ -15,7 +15,7 @@ def get_hyperparameters_space(estimator_name: str) -> Dict[str, List[Any]]:
     """Obtain the hyperparameters space for a given estimator.
 
     Args:
-        estimator_name: Name of the estimator.
+        estimator_name (str): Name of the estimator.
 
     Returns:
         dict: Dictionary with the range for each hyperparameter.
@@ -24,14 +24,24 @@ def get_hyperparameters_space(estimator_name: str) -> Dict[str, List[Any]]:
 
 
 def get_default_parameters(class_chosen: Type, from_fit: bool = False) -> Dict[str, Any]:
-    """Obtain the default hyperparameter for a given estimator.
+    """
+    Retrieve the default hyperparameters for a given estimator class.
+
+    This function inspects the constructor (`__init__`) or the `fit` method
+    of the specified estimator class and returns a dictionary containing
+    all parameters that have default values, excluding `self`.
 
     Args:
-        class_chosen: the estimator to get the parameter from.
+        class_chosen (Type): The estimator class to retrieve default parameters from.
+        from_fit (bool, optional): If True, retrieve defaults from the `fit` method
+            instead of the constructor. Defaults to False.
 
     Returns:
-        dict: Dictionary containing the default values.
+        Dict[str, Any]: A dictionary mapping parameter names to their default values.
+            Only parameters with default values are included.
+
     """
+
     target = class_chosen.fit if from_fit else class_chosen.__init__
     sig = signature(target)
     defaults = {

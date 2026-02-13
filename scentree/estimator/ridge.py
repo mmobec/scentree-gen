@@ -8,8 +8,8 @@ class RidgeEstimator(SklearnEstimator):
     """Wrapper for the scikit-learn `Ridge` regression estimator.
 
     Args:
-    estimator_class (Optional[Type[BaseEstimator]]):
-            Estimator class to wrap. Defaults to `sklearn.linear_model.Ridge`.
+    estimator_class (Optional[Type[BaseEstimator]]): Estimator class to wrap.
+        Defaults to `sklearn.linear_model.Ridge`.
     """
 
     def __init__(self, estimator_class: Optional[Type[BaseEstimator]] = None):
