@@ -7,8 +7,8 @@ def rmse(y_true: Union[np.ndarray, list], y_pred: Union[np.ndarray, list]) -> fl
     """Computes the root mean squared error.
 
     Args:
-        y_true (np.ndarray): Real value.
-        y_pred (np.ndarray): Predicted value.
+        y_true (Union[np.ndarray, list]): Real value.
+        y_pred (Union[np.ndarray, list]): Predicted value.
 
     Returns:
         float: Root mean squared error.
