@@ -5,34 +5,45 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "scentree"
 version = "0.0.1"
-description = "A python package implementing scenario tree generation process"
+description = "A Python package to generate scenario trees for multi-stage stochastic programming problems."
 readme = "README.md"
 license = {file = "LICENSE"}
+authors = [
+    {name = "Cristian Pachón García", email = "cristian.pachon@upc.edu"},
+    {name = "Albert Solà Vilalta", email = "albert.sola.vilalta@upc.edu"},
+    {name = "F.-Javier Heredia", email="f.javier.heredia@upc.edu"}
+]
+maintainers = [
+    {name = "Cristian Pachón García", email = "cristian.pachon@upc.edu"},
+    {name = "Albert Solà Vilalta", email = "albert.sola.vilalta@upc.edu"},
+]
+keywords = ["scenario tree", "forecasting", "ML", "stochastic optimisation"]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "matplotlib==3.10.5",
-    "numpy==2.3.3",
-    "pydantic==2.5.3",
-    "scikit-learn==1.7.2",
+    "matplotlib>=3.8",
+    "numpy>=2.3",
+    "pydantic>=2.5",
+    "scikit-learn>=1.7",
+    "statsmodels>=0.14",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "black==23.11",
-    "flake8==6.1.0",
-    "ipykernel==6.30.1",
-    "pdbpp==0.11.5",
-    "statsmodels==0.14.4",
+    "black>=23.11,<24",
+    "flake8>=6.1,<7",
+    "ipykernel>=6.30,<7",
+    "pdbpp>=0.11,<0.12",
 ]
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["scentree_gen*"]
+where = ["."]
+include = ["scentree*"]
 
 [tool.black]
 line-length = 100
