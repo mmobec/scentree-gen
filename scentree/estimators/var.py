@@ -199,7 +199,7 @@ class VarEstimator:
             cv_scores = []
             i = 1
             for train_idx, test_idx in cv_splitter.split(X):
-                X_train, X_test = X[train_idx], X[test_idx]
+                X_train, X_test = X[train_idx, :], X[test_idx, :]
                 fold_estimator = copy.deepcopy(self)
                 fold_estimator.set_params(**current_params)
                 fold_estimator.fit(X_train)
