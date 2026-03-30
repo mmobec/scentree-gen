@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 from pydantic import BaseModel
 from scentree.config import explained_var
 from scentree.dim_reduction.pca import BasePCA
@@ -16,24 +17,24 @@ class StageManager(BaseModel):
 
     def get_scenarios(
         self,
-        residuals: np.ndarray,
-        estimated_values: np.ndarray,
+        residuals: NDArray[np.float64],
+        estimated_values: NDArray[np.float64],
         num_trees: int,
         num_scenarios: int,
         seed: Optional[int] = None,
-    ) -> List[np.ndarray]:
+    ) -> List[NDArray[np.float64]]:
         """
         Obtain the scenarios given all components that are needed.
 
         Args:
-            residuals(np.ndarray): Matrix containing historical residuals.
-            estimated_values (np.ndarray): Estimated values.
+            residuals(NDArray[np.float64]): Matrix containing historical residuals.
+            estimated_values (NDArray[np.float64]): Estimated values.
             num_trees (int): Number of trees to provide.
             num_scenarios (int): Number of scenarios to generate the fan.
             seed (Optional[int]): Seed needed in case reproducibility is required.
 
         Returns:
-            List[np.ndarray]: List containing the scenarios.
+            List[NDArray[np.float64]]: List containing the scenarios.
         """
         scenarios = []
         # For each day, generate the scenarios
@@ -52,18 +53,18 @@ class StageManager(BaseModel):
 
     def generate_scenarios(
         self,
-        X: np.ndarray,
+        X: NDArray[np.float64],
         num_trees: int,
         num_scenarios: int,
         build_in_sample_trees: bool = True,
         seed: Optional[int] = None,
-    ) -> List[np.ndarray]:
+    ) -> List[NDArray[np.float64]]:
         """
         Manager of the scenario generation. It controls all steps needed in order to
         obtain the scenarios.
 
         Args:
-            X (np.ndarray): Historical data.
+            X (NDArray[np.float64]): Historical data.
             num_trees (int):  Number of trees to provide.
             num_scenarios (int): Number of scenarios to generate the fan.
             build_in_sample_trees (bool): Whether to build in sample trees or
@@ -71,7 +72,7 @@ class StageManager(BaseModel):
             seed (Optional[int]): Seed needed in case reproducibility is required.
 
         Returns:
-            List[np.ndarray]: List of scenarios.
+            List[NDArray[np.float64]]: List of scenarios.
         """
         # Perform normalization
         scaler = StandardScaler()
