@@ -48,25 +48,19 @@ include = ["scentree*"]
 where = ["."]
 
 [tool.black]
-diff = true
 line-length = 100
+diff = true
 skip-string-normalization = false
 verbose = true
 
-[flake8]
+[tool.flake8]
 max-line-length = 100
-exclude =
-    .git,
-    __pycache__,
-    build,
-    dist,
-    .venv,
-    *.pyc
+exclude = [".git", "__pycache__", "build", "dist", ".venv", "*.pyc"]
 
 [tool.mypy]
+python_version = "3.12"
 check_untyped_defs = true
 disallow_untyped_defs = true
-python_version = "3.12"
 strict_optional = true
 warn_return_any = true
 warn_unused_ignores = true
