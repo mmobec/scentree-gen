@@ -27,6 +27,7 @@ dependencies = [
     "numpy>=2.3",
     "pydantic>=2.5",
     "scikit-learn>=1.7",
+    "scipy>=1.17.1",
     "statsmodels>=0.14",
 ]
 
@@ -35,6 +36,7 @@ dev = [
     "black>=23.11,<24",
     "flake8>=6.1,<7",
     "ipykernel>=6.30,<7",
+    "mypy>=1.8,<2",
     "pdbpp>=0.11,<0.12",
 ]
 
@@ -48,3 +50,15 @@ include = ["scentree*"]
 [tool.black]
 line-length = 100
 skip-string-normalization = false
+
+[tool.mypy]
+python_version = "3.12"
+disallow_untyped_defs = true
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "scipy.*", "statsmodels.*"]
+ignore_missing_imports = true
