@@ -181,7 +181,11 @@ class DatasetLoader(BaseModel):
                 the stage-wise data and stage names.
         """
         stage_names = [name for name in self.datasets_information.keys()]
-        return StageWiseLoader(data=self.stage_data, stage_names=stage_names)
+
+        stage_loader = StageWiseLoader(
+            data=self.stage_data, stage_ids=self.stage_ids, stage_names=stage_names
+        )
+        return stage_loader
 
 
 class StageWiseLoader(BaseModel):
@@ -202,7 +206,9 @@ class StageWiseLoader(BaseModel):
     """
 
     data: List[np.ndarray]
+    stage_ids: List[int]
     stage_names: Optional[List[str]] = None
+    num_variables_per_stage: List[int] = Field(default_factory=list)
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -230,6 +236,12 @@ class StageWiseLoader(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def validate_stage_ids(self) -> Self:
+        if len(self.stage_ids) != len(self.data):
+            raise ValueError("`data` and `stage_ids` must be of the same length")
+        return self
+
+    @model_validator(mode="after")
     def validate_stage_names(self) -> Self:
         """
         Validate that `stage_names` has the same length as `data`.
@@ -243,6 +255,11 @@ class StageWiseLoader(BaseModel):
         """
         if self.stage_names is not None and len(self.stage_names) != len(self.data):
             raise ValueError("`data` and `stage_names` must be of the same length")
+        return self
+
+    @model_validator(mode="after")
+    def fill_attributes(self) -> Self:
+        self.num_variables_per_stage = [X.shape[1] for X in self.data]
         return self
 
     def create_full_data(self) -> np.ndarray:
