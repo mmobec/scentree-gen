@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 from pydantic import BaseModel, Field, model_validator
 from typing import Dict, List, Self, Optional
 
@@ -8,7 +9,7 @@ class DatasetSpec(BaseModel):
     Container for the minimal information required to describe a dataset.
 
     Attributes:
-        values (np.ndarray): The matrix containing the data.
+        values (NDArray[np.float64]): The matrix containing the data.
         stages (List[int]): The stage each column belongs to.
         priority (List[int]): The priority of each column within its stage.
             It is used to break ties.
@@ -16,7 +17,7 @@ class DatasetSpec(BaseModel):
             Default is False.
     """
 
-    values: np.ndarray
+    values: NDArray[np.float64]
     stages: List[int]
     priority: List[int]
     all_positive: bool = False
@@ -65,13 +66,13 @@ class DatasetLoader(BaseModel):
             involved in the problem.
         stage_ids (List[int]): Identifier of each stage. It is automatically populated
             from`datasets_information`.
-        stage_data (List[np.ndarray]): Data matrix corresponding to each stage.
+        stage_data (List[NDArray[np.float64]]): Data matrix corresponding to each stage.
             It is automatically populated from`datasets_information`.
     """
 
     datasets_information: Dict[str, DatasetSpec]
     stage_ids: List[int] = Field(default_factory=list)
-    stage_data: List[np.ndarray] = Field(default_factory=list)
+    stage_data: List[NDArray[np.float64]] = Field(default_factory=list)
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -161,9 +162,9 @@ class DatasetLoader(BaseModel):
                     priorities_stage.extend(priority_variables)
                     variables = info.values[:, idx_variables_stage]
                     variables_stage.append(variables)
-            variables_stage = np.concatenate(variables_stage, axis=1)
+            variables_stage_matrix = np.concatenate(variables_stage, axis=1)
             idx_priorities_sorted = np.argsort(priorities_stage)
-            variables_sorted.append(variables_stage[:, idx_priorities_sorted])
+            variables_sorted.append(variables_stage_matrix[:, idx_priorities_sorted])
         self.stage_data = variables_sorted
         return self
 
@@ -198,14 +199,14 @@ class StageWiseLoader(BaseModel):
     a single matrix.
 
     Attributes:
-        data (List[np.ndarray]): List of matrices, one per stage, where
+        data (List[NDArray[np.float64]]): List of matrices, one per stage, where
             each matrix contains the variables for that stage. All matrices
             must have the same number of rows.
         stage_names (Optional[List[str]]): Optional list of names for each
             stage. Must have the same length as `data` if provided.
     """
 
-    data: List[np.ndarray]
+    data: List[NDArray[np.float64]]
     stage_ids: List[int]
     stage_names: Optional[List[str]] = None
     num_variables_per_stage: List[int] = Field(default_factory=list)
@@ -262,12 +263,12 @@ class StageWiseLoader(BaseModel):
         self.num_variables_per_stage = [X.shape[1] for X in self.data]
         return self
 
-    def create_full_data(self) -> np.ndarray:
+    def create_full_data(self) -> NDArray[np.float64]:
         """
         Concatenate all stage matrices into a single matrix along columns.
 
         Returns:
-            np.ndarray: A matrix containing all variables from all stages,
+            NDArray[np.float64]: A matrix containing all variables from all stages,
                 concatenated column-wise.
         """
         return np.concatenate(self.data, axis=1)
