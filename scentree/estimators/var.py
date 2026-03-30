@@ -1,11 +1,12 @@
 import copy
 import numpy as np
 import itertools
+from numpy.typing import NDArray
 from scentree.estimators.utils import get_default_parameters, get_hyperparameters_space
 from scentree.metrics.rmse import rmse
 from statsmodels.tsa.vector_ar.var_model import VAR, VARResultsWrapper
 from sklearn.model_selection import BaseCrossValidator, TimeSeriesSplit
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, cast, Dict, Optional, TypeVar, Union
 
 
 R = TypeVar("R", bound="VarEstimator")
@@ -24,7 +25,7 @@ class VarEstimator:
             used for hyperparameter optimization or tuning.
         results (Optional[VARResultsWrapper]): Storage for the results of the fitted VAR model.
             Initially None, set after fitting.
-        X_train_ (Optional[np.ndarray]): Training data used for fitting the model.
+        X_train_ (Optional[NDArray[np.float64]]): Training data used for fitting the model.
             Stored for reference or further computation.
     """
 
@@ -33,15 +34,15 @@ class VarEstimator:
     hyperparameters = get_default_parameters(estimator_class, from_fit=True)
     hyperparameters_space = get_hyperparameters_space(name)
     results: Optional[VARResultsWrapper] = None
-    X_train_: Optional[np.ndarray] = None
+    X_train_: Optional[NDArray[np.float64]] = None
 
     model_config = {"arbitrary_types_allowed": True}
 
-    def fit(self: R, X: np.ndarray) -> R:
+    def fit(self: R, X: NDArray[np.float64]) -> R:
         """Fit the statsmodels estimator to the training data.
 
         Args:
-            X (np.ndarray): Input data for fitting the model.
+            X (NDArray[np.float64]): Input data for fitting the model.
 
         Raises:
             ValueError: If hypermaters have not been provided previously.
@@ -67,26 +68,26 @@ class VarEstimator:
         self.results = self.estimator.fit(**fit_params)
         return self
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """Generate forecasts using the fitted statsmodels estimator.
         Args:
-            X (np.ndarray): Input data for which to make predictions; its shape
+            X (NDArray[np.float64]): Input data for which to make predictions; its shape
                 determines the number of forecast steps.
 
         Raises:
             ValueError: If 'fit()' has not been called before prediction.
 
         Returns:
-            np.ndarray: Forecasted values.
+            NDArray[np.float64]: Forecasted values.
         """
         steps = X.shape[0]
         if self.results is None or self.X_train_ is None:
             raise ValueError("You must call `fit()` before `predict()`.")
         p = self.results.k_ar
         forecasted_values = self.results.forecast(y=self.X_train_[-p:, :], steps=steps)
-        return forecasted_values
+        return cast(NDArray[np.float64], forecasted_values)
 
-    def in_sample_estimation(self, steps: int) -> np.ndarray:
+    def in_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate in sample estimations.
 
@@ -97,16 +98,16 @@ class VarEstimator:
             ValueError: If `fit()` has not been called before in_sample_estimation.
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         if self.results is None:
             raise ValueError("You must call `fit()` before `in_sample_estimation()`.")
-        fitted = self.results.fittedvalues
+        fitted = cast(NDArray[np.float64], self.results.fittedvalues)
         if steps > fitted.shape[0]:
             raise ValueError("`steps` cannot exceed the number of in-sample predictions.")
         return fitted[-steps:, :]
 
-    def out_sample_estimation(self, steps: int) -> np.ndarray:
+    def out_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate out sample estimations.
 
@@ -118,12 +119,14 @@ class VarEstimator:
             ValueError: If `steps` exceeds the number of samples.
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         if self.results is None or self.X_train_ is None:
             raise ValueError("You must call `fit()` before `out_sample_estimation()`.")
         p = self.results.k_ar
-        forecasted_values = self.results.forecast(y=self.X_train_[-p:, :], steps=steps)
+        forecasted_values = cast(
+            NDArray[np.float64], self.results.forecast(y=self.X_train_[-p:, :], steps=steps)
+        )
         return forecasted_values
 
     def get_params(self, deep: bool = True) -> Dict[str, Any]:
@@ -142,7 +145,7 @@ class VarEstimator:
             "hyperparameters_space": self.hyperparameters_space,
         }
 
-    def set_params(self: R, **params) -> R:
+    def set_params(self: R, **params: Any) -> R:
         """Set hyperparameter values for the estimator.
 
         Args:
@@ -168,13 +171,13 @@ class VarEstimator:
 
     def fit_cv(
         self: R,
-        X: np.ndarray,
+        X: NDArray[np.float64],
         cv: Union[int, BaseCrossValidator] = 5,
     ) -> R:
         """Perform cross-validation over the hyperparameter space and fit the best model.
 
         Args:
-            X (np.ndarray): Input feature matrix.
+            X (NDArray[np.float64]): Input feature matrix.
             cv (Union[int, BaseCrossValidator]): Number of CV splits or a cross-validator instance.
 
         Returns:
@@ -207,7 +210,7 @@ class VarEstimator:
                     raise ValueError("You must call `fit()`")
                 score = fold_estimator.get_score(X_test)
                 cv_scores.append(score)
-            mean_score = np.mean(cv_scores)
+            mean_score = float(np.mean(cv_scores))
             if mean_score < best_score:
                 best_score = mean_score
                 best_params = current_params
@@ -218,19 +221,19 @@ class VarEstimator:
         self.fit(X)
         return self
 
-    def estimate_residuals(self, X: np.ndarray) -> np.ndarray:
+    def estimate_residuals(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         Estimate residuals.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction. This
+            X (NDArray[np.float64]): Input feature matrix for prediction. This
                 matrix is used as the true values.
 
         Raises:
             ValueError: If `fit()` has not been called before computing the residuals.
 
         Returns:
-            np.ndarray: Residuals.
+            NDArray[np.float64]: Residuals.
         """
         if self.results is None:
             raise ValueError("You must call `fit()` before `estimate_residuals()`.")
@@ -238,14 +241,14 @@ class VarEstimator:
         X_true = X[p:, :]
         X_estimated = self.results.fittedvalues
         residuals = X_true - X_estimated
-        return residuals
+        return cast(NDArray[np.float64], residuals)
 
-    def get_score(self, X: np.ndarray) -> float:
+    def get_score(self, X: NDArray[np.float64]) -> float:
         """
         Compute the score metric using the data provided.
 
         Args:
-            X (np.ndarray): Matrix containing the features.
+            X (NDArray[np.float64]): Matrix containing the features.
             estimator (EstimatorProtocol): The estimator to be evaluated.
 
         Raises:
@@ -258,4 +261,4 @@ class VarEstimator:
             raise ValueError("You must call `fit()` before `get_score()`.")
         estimated_values = self.predict(X)
         score = rmse(X, estimated_values)
-        return score
+        return float(score)

@@ -1,9 +1,10 @@
 import numpy as np
+from numpy.typing import NDArray
 from pydantic import BaseModel
 from scentree.estimators.ridge import RidgeEstimator
 from scentree.estimators.var import VarEstimator
 from sklearn.model_selection import BaseCrossValidator
-from typing import Any, ClassVar, List, Optional, Protocol, Self, Type, TypeVar, Union
+from typing import Any, cast, ClassVar, List, Optional, Protocol, Self, Type, TypeVar, Union
 
 R = TypeVar("R", bound="EstimatorController")
 
@@ -17,39 +18,42 @@ class EstimatorProtocol(Protocol):
     out-of-sample estimation, and scoring.
     """
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """Generate predictions.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction.
+            X (NDArray[np.float64]): Input feature matrix for prediction.
 
         Returns:
-            np.ndarray: Predicted target values.
+            NDArray[np.float64]: Predicted target values.
         """
         ...
 
-    def estimate_residuals(self, X: np.ndarray) -> np.ndarray:
+    def estimate_residuals(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         Estimate residuals.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction. This
+            X (NDArray[np.float64]): Input feature matrix for prediction. This
                 matrix is used as the true values.
 
         Returns:
-            np.ndarray: Residuals.
+            NDArray[np.float64]: Residuals.
         """
         ...
 
     def fit_cv(
-        self, X: np.ndarray, y: Optional[np.ndarray], cv: Union[int, BaseCrossValidator]
+        self,
+        X: NDArray[np.float64],
+        y: Optional[NDArray[np.float64]],
+        cv: Union[int, BaseCrossValidator],
     ) -> Self:
         """
         Fit an estmator using cross-validation.
 
         Args:
-            X (np.ndarray): Input feature matrix.
-            y (Optional[np.ndarray]): Target value.
+            X (NDArray[np.float64]): Input feature matrix.
+            y (Optional[NDArray[np.float64]]): Target value.
             cv (Union[int, BaseCrossValidator]): Number of folds (if int) or a
                 scikit-learn compatible cross-validator instance defining
                 the splitting strategy.
@@ -59,7 +63,7 @@ class EstimatorProtocol(Protocol):
         """
         ...
 
-    def in_sample_estimation(self, steps: int) -> np.ndarray:
+    def in_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate in sample estimations.
 
@@ -67,11 +71,11 @@ class EstimatorProtocol(Protocol):
             steps (int): Number of estimated values to provide.
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         ...
 
-    def out_sample_estimation(self, steps: int) -> np.ndarray:
+    def out_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate out sample estimations.
 
@@ -79,16 +83,16 @@ class EstimatorProtocol(Protocol):
             steps (int): Number of estimated values to provide.
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         ...
 
-    def get_score(self, X: np.ndarray) -> float:
+    def get_score(self, X: NDArray[np.float64]) -> float:
         """
         Compute the score metric using the data provided.
 
         Args:
-            X (np.ndarray): Matrix containing the features.
+            X (NDArray[np.float64]): Matrix containing the features.
 
         Returns:
             float: The scoring measure.
@@ -112,12 +116,12 @@ class EstimatorController(BaseModel):
     estimator_classes: ClassVar[List[Type]] = [RidgeEstimator, VarEstimator]
     best_estimator: Optional[Any] = None
 
-    def get_score(self, X: np.ndarray, estimator: EstimatorProtocol) -> float:
+    def get_score(self, X: NDArray[np.float64], estimator: EstimatorProtocol) -> float:
         """
         Compute the score metric using the data provided.
 
         Args:
-            X (np.ndarray): Matrix containing the features.
+            X (NDArray[np.float64]): Matrix containing the features.
             estimator (EstimatorProtocol): The estimator to be evaluated.
 
         Returns:
@@ -128,13 +132,13 @@ class EstimatorController(BaseModel):
 
     def fit(
         self: R,
-        X: np.ndarray,
+        X: NDArray[np.float64],
         cv: Union[int, BaseCrossValidator] = 5,
     ) -> R:
         """Train an estimator.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction.
+            X (NDArray[np.float64]): Input feature matrix for prediction.
             cv (Union[int, BaseCrossValidator]): Cross-validation configuration.
                 Defaults to 5.
 
@@ -161,29 +165,29 @@ class EstimatorController(BaseModel):
         self.best_estimator = estimator_chosen
         return self
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """Generate predictions.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction.
+            X (NDArray[np.float64]): Input feature matrix for prediction.
 
         Raises:
             ValueError: If the estimator has not been previously fitted
                 (i.e., `self.best_estimator` is None).
 
         Returns:
-            np.ndarray: Predicted target values.
+            NDArray[np.float64]: Predicted target values.
         """
         if self.best_estimator is None:
             raise ValueError("You must call `fit()` before `predict()`.")
-        return self.best_estimator.predict(X)
+        return cast(NDArray[np.float64], self.best_estimator.predict(X))
 
-    def estimate_residuals(self, X: np.ndarray) -> np.ndarray:
+    def estimate_residuals(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         Estimate residuals.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction. This
+            X (NDArray[np.float64]): Input feature matrix for prediction. This
                 matrix is used as the true values.
 
         Raises:
@@ -191,13 +195,13 @@ class EstimatorController(BaseModel):
                 (i.e., `self.best_estimator` is None).
 
         Returns:
-            np.ndarray: Residuals.
+            NDArray[np.float64]: Residuals.
         """
         if self.best_estimator is None:
             raise ValueError("You must call `fit()` before `estimate_residuals()`.")
-        return self.best_estimator.estimate_residuals(X)
+        return cast(NDArray[np.float64], self.best_estimator.estimate_residuals(X))
 
-    def in_sample_estimation(self, steps: int) -> np.ndarray:
+    def in_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate in sample estimations.
 
@@ -209,13 +213,13 @@ class EstimatorController(BaseModel):
                 (i.e., `self.best_estimator` is None).
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         if self.best_estimator is None:
             raise ValueError("You must call `fit()` before `in_sample_estimation()`.")
-        return self.best_estimator.in_sample_estimation(steps)
+        return cast(NDArray[np.float64], self.best_estimator.in_sample_estimation(steps))
 
-    def out_sample_estimation(self, steps: int) -> np.ndarray:
+    def out_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate out sample estimations.
 
@@ -227,8 +231,8 @@ class EstimatorController(BaseModel):
                 (i.e., `self.best_estimator` is None).
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         if self.best_estimator is None:
             raise ValueError("You must call `fit()` before `out_sample_estimation()`.")
-        return self.best_estimator.out_sample_estimation(steps)
+        return cast(NDArray[np.float64], self.best_estimator.out_sample_estimation(steps))

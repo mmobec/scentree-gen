@@ -1,11 +1,12 @@
 import numpy as np
+from numpy.typing import NDArray
 from scentree.estimators.utils import get_default_parameters, get_hyperparameters_space
 from scentree.metrics.rmse import rmse
 from sklearn.base import BaseEstimator
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import GridSearchCV, TimeSeriesSplit
 from sklearn.model_selection._split import _BaseKFold
-from typing import Any, Dict, Optional, Type, TypeVar, Union
+from typing import cast, Any, Dict, Optional, Type, TypeVar, Union
 
 R = TypeVar("R", bound="SklearnEstimator")
 
@@ -30,8 +31,8 @@ class SklearnEstimator(BaseEstimator):
             instantiate the estimator.
         hyperparameters_space (Dict[str, List[Any]]): Dictionary defining the search
             space for hyperparameters for tuning or optimization.
-        X_train_ (Optional[np.ndarray]): Optional attribute to store training data, if needed
-            for reference or internal operations.
+        X_train_ (Optional[NDArray[np.float64]]): Optional attribute to store training data,
+            if needed for reference or internal operations.
     """
 
     def __init__(self, estimator_class: Type[Any]):
@@ -46,34 +47,35 @@ class SklearnEstimator(BaseEstimator):
         self.name = self.estimator_class.__name__
         self.hyperparameters = get_default_parameters(estimator_class)
         self.hyperparameters_space = get_hyperparameters_space(self.name)
-        self.X_train_: Optional[np.ndarray] = None
+        self.X_train_: Optional[NDArray[np.float64]] = None
 
-    def fit(self: R, X: np.ndarray, y: np.ndarray) -> R:
+    def fit(self: R, X: NDArray[np.float64], y: NDArray[np.float64]) -> R:
         """Fit the wrapped Scikit-learn estimator to the training data.
 
         Args:
-            X (np.ndarray): Input feature matrix for training.
-            y (np.ndarray): Target vector.
+            X (NDArray[np.float64]): Input feature matrix for training.
+            y (NDArray[np.float64]): Target vector.
 
         Returns:
             R: The fitted wrapper instance.
         """
         self.estimator = self.estimator_class(**self.hyperparameters)
+        assert self.estimator is not None
         self.estimator.fit(X, y)
         self.X_train_ = X
         return self
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """Generate predictions using the fitted Scikit-learn estimator.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction.
+            X (NDArray[np.float64]): Input feature matrix for prediction.
 
         Raises:
             ValueError: If `fit()` has not been called before prediction.
 
         Returns:
-            np.ndarray: Predicted target values.
+            NDArray[np.float64]: Predicted target values.
         """
         if self.estimator is None:
             raise ValueError("You must call `fit()` before `predict()`.")
@@ -95,7 +97,7 @@ class SklearnEstimator(BaseEstimator):
             "hyperparameters_space": self.hyperparameters_space,
         }
 
-    def set_params(self: R, **params) -> R:
+    def set_params(self: R, **params: Any) -> R:
         """Set hyperparameter values for the estimator.
 
         Args:
@@ -119,7 +121,7 @@ class SklearnEstimator(BaseEstimator):
 
     def fit_cv(
         self,
-        X: np.ndarray,
+        X: NDArray[np.float64],
         cv: Union[int, _BaseKFold] = 5,
     ) -> BaseEstimator:
         """
@@ -127,7 +129,7 @@ class SklearnEstimator(BaseEstimator):
         and return a trained instance of the best model.
 
         Args:
-            X (np.ndarray): Training feature matrix.
+            X (NDArray[np.float64]): Training feature matrix.
             cv (int or BaseCrossValidator): Cross-validation strategy. Default is 5-fold.
 
         Returns:
@@ -166,7 +168,7 @@ class SklearnEstimator(BaseEstimator):
 
         return self
 
-    def in_sample_estimation(self, steps: int) -> np.ndarray:
+    def in_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate in sample estimations.
 
@@ -177,14 +179,14 @@ class SklearnEstimator(BaseEstimator):
             ValueError: If `fit()` has not been called before in_sample_estimation.
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         if self.X_train_ is None:
             raise ValueError("You must call `fit()` before `in_sample_estimation()`.")
         estimated_values = self.predict(self.X_train_[-steps:, :])
         return estimated_values
 
-    def out_sample_estimation(self, steps: int) -> np.ndarray:
+    def out_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
         Generate out sample estimations.
 
@@ -195,7 +197,7 @@ class SklearnEstimator(BaseEstimator):
             ValueError: If `fit()` has not been called before out_sample_estimation.
 
         Returns:
-            np.ndarray: Matrix containing the estimated values.
+            NDArray[np.float64]: Matrix containing the estimated values.
         """
         if self.X_train_ is None:
             raise ValueError("You must call `fit()` before `in_sample_estimation()`.")
@@ -207,12 +209,12 @@ class SklearnEstimator(BaseEstimator):
             current_data = current_estimation
         return estimated_values
 
-    def get_score(self, X: np.ndarray) -> float:
+    def get_score(self, X: NDArray[np.float64]) -> float:
         """
         Compute the score metric using the data provided.
 
         Args:
-            X (np.ndarray): Matrix containing the features.
+            X (NDArray[np.float64]): Matrix containing the features.
             estimator (EstimatorProtocol): The estimator to be evaluated.
 
         Raises:
@@ -231,23 +233,23 @@ class SklearnEstimator(BaseEstimator):
         estimated_aligned = estimated_values[:-1, :]
         return rmse(X_aligned, estimated_aligned)
 
-    def estimate_residuals(self, X: np.ndarray) -> np.ndarray:
+    def estimate_residuals(self, X: NDArray[np.float64]) -> NDArray[np.float64]:
         """
         Estimate residuals.
 
         Args:
-            X (np.ndarray): Input feature matrix for prediction. This
+            X (NDArray[np.float64]): Input feature matrix for prediction. This
                 matrix is used as the true values.
 
         Raises:
             ValueError: If `fit()` has not been called before computing the residuals.
 
         Returns:
-            np.ndarray: Residuals.
+            NDArray[np.float64]: Residuals.
         """
         if self.X_train_ is None:
             raise ValueError("You must call `fit()` before `estimate_residuals()`.")
         estimated_values = self.predict(X)
         X_true = X[1:, :]
         X_estimated = estimated_values[:-1, :]
-        return X_true - X_estimated
+        return cast(NDArray[np.float64], X_true - X_estimated)
