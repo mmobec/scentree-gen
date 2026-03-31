@@ -35,6 +35,7 @@ dependencies = [
 dev = [
     "black>=23.11,<24",
     "flake8>=6.1,<7",
+    "flake8-pyproject>=1.2",
     "ipykernel>=6.30,<7",
     "mypy>=1.8,<2",
     "pdbpp>=0.11,<0.12",
