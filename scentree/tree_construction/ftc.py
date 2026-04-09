@@ -1,10 +1,16 @@
+import logging
 import numpy as np
+import os
 from copy import copy
+from datetime import datetime
 from numpy.typing import NDArray
+from pathlib import Path
 from pydantic import BaseModel, Field, model_validator, PrivateAttr
 from scipy.spatial import distance_matrix
-from typing import Dict, List, Optional, Self, Tuple, TypedDict
+from typing import Dict, List, Optional, Self, Tuple, TypedDict, Union
 
+
+logger = logging.getLogger(__name__)
 
 class Graph(TypedDict):
     """Graph structure representing the scenario tree.
@@ -637,6 +643,24 @@ class FTC(BaseModel):
             new_edges.append((mapping_ids[oe[0]], mapping_ids[oe[1]]))
         graph["ids"] = new_ids
         graph["edges"] = new_edges
+        return None
+
+    def save_json(self, output_dir: Union[str, Path]) -> None:
+        output_dir = Path(output_dir)
+        if not output_dir.exists():
+            raise FileNotFoundError(f"Directory {output_dir} does not exist")
+
+        if not output_dir.is_dir():
+            raise NotADirectoryError(f"{output_dir} is not a directory")
+
+        base_name = datetime.now().strftime("results_%Y%m%d_%H%M%S")
+        new_dir = output_dir / base_name
+        counter = 1
+        while new_dir.exists():
+            new_dir = output_dir / f"{base_name}_{counter}"
+            counter += 1
+        new_dir.mkdir()
+        logger.info(f"Results saved in {new_dir}")
         return None
 
     def generate_trees(
