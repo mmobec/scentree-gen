@@ -6,8 +6,8 @@ class MapColumns(TypedDict):
     Mapping between a dataset and the ordering of its columns.
 
     Attributes:
-        dataset: Name of the dataset.
-        columns: List of column indices defining their order.
+        dataset (str): Name of the dataset.
+        columns (List[int]): List of column indices defining their order.
     """
 
     dataset: str
