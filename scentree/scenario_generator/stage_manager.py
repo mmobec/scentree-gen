@@ -5,7 +5,24 @@ from scentree.config import explained_var
 from scentree.dim_reduction.pca import BasePCA
 from scentree.estimators.estimator_orchestrator import EstimatorController
 from sklearn.preprocessing import StandardScaler
-from typing import List, Optional
+from typing import List, Optional, TypedDict
+
+
+class ScenariosPayload(TypedDict):
+    """
+    Container for scenario generation results.
+
+    Attributes:
+        scenarios (List[NDArray[np.float64]]): Generated scenarios.
+        predicted_values (List[NDArray[np.float64]]): Predicted values associated
+            with each scenario.
+        observed_values Optional[List[NDArray[np.float64]]]: Observed values
+            corresponding to each scenario, if available.
+    """
+
+    scenarios: List[NDArray[np.float64]]
+    predicted_values: List[NDArray[np.float64]]
+    observed_values: Optional[List[NDArray[np.float64]]]
 
 
 class StageManager(BaseModel):
@@ -51,28 +68,31 @@ class StageManager(BaseModel):
             scenarios.append(current_scenarios)
         return scenarios
 
-    def generate_scenarios(
+    def generate_scenarios_payload(
         self,
         X: NDArray[np.float64],
         num_trees: int,
         num_scenarios: int,
         build_in_sample_trees: bool = True,
         seed: Optional[int] = None,
-    ) -> List[NDArray[np.float64]]:
+    ) -> ScenariosPayload:
         """
-        Manager of the scenario generation. It controls all steps needed in order to
-        obtain the scenarios.
+        Orchestrates the scenario generation process from historical data.
 
         Args:
             X (NDArray[np.float64]): Historical data.
-            num_trees (int):  Number of trees to provide.
-            num_scenarios (int): Number of scenarios to generate the fan.
+            num_trees (int):  Number of trees to generate.
+            num_scenarios (int): Number of scenarios to generate.
             build_in_sample_trees (bool): Whether to build in sample trees or
                 out sample trees. Default to True, meaning that in sample trees are built.
             seed (Optional[int]): Seed needed in case reproducibility is required.
 
         Returns:
-            List[NDArray[np.float64]]: List of scenarios.
+            ScenariosPayload:
+                A container with:
+                    - scenarios: generated scenarios
+                    - predicted_values: model predictions
+                    - observed_values: optional observed values
         """
         # Perform normalization
         scaler = StandardScaler()
@@ -92,8 +112,10 @@ class StageManager(BaseModel):
         # Get estimated values
         if build_in_sample_trees:
             estimated_values = estimator_controller.in_sample_estimation(num_trees)
+            observed_values = [row for row in X[-num_trees:, :]]
         else:
             estimated_values = estimator_controller.out_sample_estimation(num_trees)
+            observed_values = None
 
         # Create scenarios for all num_trees
         scenarios = self.get_scenarios(
@@ -105,8 +127,15 @@ class StageManager(BaseModel):
         )
         # For each tree, recover the data in the high dimensional space
         scenarios_high = []
+        estimated_values_high = dim_reduction.inverse_transform(estimated_values)
+        estimated_original = scaler.inverse_transform(estimated_values_high)
         for current_scenarios in scenarios:
             sc_high = dim_reduction.inverse_transform(current_scenarios)
             sc_original = scaler.inverse_transform(sc_high)
             scenarios_high.append(sc_original)
-        return scenarios_high
+        results: ScenariosPayload = {
+            "scenarios": scenarios_high,
+            "predicted_values": [row for row in estimated_original],
+            "observed_values": observed_values,
+        }
+        return results
