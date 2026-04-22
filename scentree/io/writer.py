@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 from numpy.typing import NDArray
 from pathlib import Path
-from scentree.io import MapColsNames
+from scentree.io import MapColsNamesStages
 from scentree.tree_construction import Tree
 from typing import List, Union
 
@@ -19,7 +19,7 @@ def save_json(
     observed_value: Union[List[NDArray], None],
     scenarios: List[NDArray[np.float64]],
     trees: List[Tree],
-    mapping_datasets_columns: MapColsNames,
+    mapping_datasets_columns: MapColsNamesStages,
     multiple_files: bool = False,
 ) -> None:
     """
@@ -41,8 +41,8 @@ def save_json(
             one per tree.
         trees (List[Tree]): List of tree structures corresponding to each
             scenario set.
-        mapping_datasets_columns (MapColsNames): Mapping between dataset names
-            and their column indices.
+        mapping_datasets_columns (MapColsNamesStages): Mapping between dataset names,
+            their column indices and their stages.
         multiple_files (bool): If True, results are saved in separate files
             (not yet implemented). If False, all results are stored in a
             single JSON file.
@@ -73,7 +73,7 @@ def save_json(
             current_observed_value = observed_value[i].tolist()
         else:
             current_observed_value = None
-        current_tree = trees[i]
+        scenario_probabilities, nodes = trees[i]
         information = {
             "num_scenarios": current_scenarios.shape[0],
             "num_stages": num_stages,
@@ -82,8 +82,9 @@ def save_json(
             "mean_scenarios": np.mean(current_scenarios, axis=0).tolist(),
             "predicted_value": current_predicted_value,
             "observed_value": current_observed_value,
+            "scenario_probabilities": scenario_probabilities.tolist(),
             "mapping_datasets_columns": mapping_datasets_columns,
-            "tree": current_tree,
+            "tree": nodes,
         }
         data.append(information)
     if multiple_files:
