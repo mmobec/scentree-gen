@@ -1,3 +1,5 @@
+import numpy as np
+from numpy.typing import NDArray
 from typing import Dict, List, Optional, Tuple, TypedDict, Union
 
 
@@ -25,7 +27,7 @@ class Node(TypedDict):
 
 
 # A tree is a list of nodes.
-Tree = List[Node]
+Tree = Tuple[NDArray[np.float64], List[Node]]
 
 # Mapping for trees.
 TreeInfoMap = Dict[Tuple[int, int], List[int]]
