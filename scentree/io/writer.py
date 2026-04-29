@@ -5,7 +5,7 @@ from datetime import datetime
 from numpy.typing import NDArray
 from pathlib import Path
 from scentree.io import MapColsNamesStages
-from scentree.tree_construction import Tree
+from scentree.tree_construction import ScenarioTrees
 from typing import List, Union
 
 logger = logging.getLogger(__name__)
@@ -17,8 +17,7 @@ def save_json(
     in_sample_prediction: bool,
     predicted_value: List[NDArray],
     observed_value: Union[List[NDArray], None],
-    scenarios: List[NDArray[np.float64]],
-    trees: List[Tree],
+    scenario_trees: ScenarioTrees,
     mapping_datasets_columns: MapColsNamesStages,
     multiple_files: bool = False,
 ) -> None:
@@ -37,10 +36,8 @@ def save_json(
             one per tree.
         observed_value (Union[List[NDArray], None]): List of observed values,
             or None if not available.
-        scenarios (List[NDArray[np.float64]]): List of scenario matrices,
-            one per tree.
-        trees (List[Tree]): List of tree structures corresponding to each
-            scenario set.
+        scenario_trees (ScenarioTrees): List of scenario tree. Each position contains a
+            scenario tree.
         mapping_datasets_columns (MapColsNamesStages): Mapping between dataset names,
             their column indices and their stages.
         multiple_files (bool): If True, results are saved in separate files
@@ -66,25 +63,30 @@ def save_json(
         counter += 1
     new_dir.mkdir()
     data = []
-    for i in range(len(trees)):
-        current_scenarios = scenarios[i]
-        current_predicted_value = predicted_value[i].tolist()
+    for i in range(len(scenario_trees)):
+        current_scenario_tree = scenario_trees[i]
+        current_data = current_scenario_tree["scenario_tree_data"]
+        current_tree = current_scenario_tree["tree"]
+        current_predicted_value = predicted_value[i]
         if observed_value is not None:
-            current_observed_value = observed_value[i].tolist()
+            current_observed_value = observed_value[i]
         else:
             current_observed_value = None
-        scenario_probabilities, nodes = trees[i]
+        scenario_probabilities = current_scenario_tree["scenario_probabilities"]
+        mean_value_scenario_tree = np.dot(scenario_probabilities, current_data)
         information = {
-            "num_scenarios": current_scenarios.shape[0],
+            "num_scenarios": current_data.shape[0],
             "num_stages": num_stages,
             "in_sample_prediction": in_sample_prediction,
-            "scenarios": current_scenarios.tolist(),
-            "mean_scenarios": np.mean(current_scenarios, axis=0).tolist(),
-            "predicted_value": current_predicted_value,
-            "observed_value": current_observed_value,
+            "scenario_tree_data": current_data.tolist(),
+            "mean_value_scenario_tree": mean_value_scenario_tree.tolist(),
+            "predicted_value": current_predicted_value.tolist(),
+            "observed_value": current_observed_value.tolist()
+            if current_observed_value is not None
+            else current_observed_value,
             "scenario_probabilities": scenario_probabilities.tolist(),
             "mapping_datasets_columns": mapping_datasets_columns,
-            "tree": nodes,
+            "tree": current_tree,
         }
         data.append(information)
     if multiple_files:
