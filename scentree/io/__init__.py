@@ -1,7 +1,7 @@
-from typing import List, Optional, TypedDict
+from typing import List, TypedDict
 
 
-class MapColumnsStages(TypedDict):
+class DatasetMapping(TypedDict):
     """
     Mapping between a dataset and the ordering of its columns.
 
@@ -13,8 +13,7 @@ class MapColumnsStages(TypedDict):
 
     dataset: str
     columns: List[int]
-    stages: List[int]
+    stage_ids: List[int]
 
 
-# Optional list of dataset-to-column mappings
-MapColsNamesStages = Optional[List[MapColumnsStages]]
+DatasetMappings = List[DatasetMapping]
