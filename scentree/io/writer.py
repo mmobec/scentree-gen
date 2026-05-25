@@ -90,7 +90,10 @@ def save_json(
         }
         data.append(information)
     if multiple_files:
-        pass
+        for i, info in enumerate(data):
+            info_list = [info]
+            with open(new_dir / f"results_{i + 1}.json", "w", encoding="utf-8") as f:
+                json.dump(info_list, f, indent=1)
     else:
         with open(new_dir / "results.json", "w", encoding="utf-8") as f:
             json.dump(data, f, indent=1)
