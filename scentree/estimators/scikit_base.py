@@ -139,7 +139,7 @@ class SklearnEstimator(BaseEstimator):
         # First of all, split data into two sets: feature and target.
         # To begin with, only one lag is taken into account.
         steps = X.shape[0]
-        feautre = X[: (steps - 1), :]
+        feature = X[: (steps - 1), :]
         target = X[1:, :]
 
         # Define scoring, compatible with multi-output
@@ -160,11 +160,11 @@ class SklearnEstimator(BaseEstimator):
         )
 
         # Fit the grid search
-        grid.fit(feautre, target)
+        grid.fit(feature, target)
 
         # Instantiate and fit the best estimator
         self.hyperparameters = grid.best_params_
-        self.fit(feautre, target)
+        self.fit(feature, target)
 
         return self
 

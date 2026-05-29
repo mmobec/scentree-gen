@@ -89,7 +89,7 @@ class VarEstimator:
 
     def in_sample_estimation(self, steps: int) -> NDArray[np.float64]:
         """
-        Generate in sample estimations.
+        Generate in-sample estimations for the latest observations.
 
         Args:
             steps (int): Number of estimated values to provide.
