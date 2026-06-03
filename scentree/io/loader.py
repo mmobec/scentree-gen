@@ -231,11 +231,11 @@ class DatasetsLoader(BaseModel):
                     if ds.name in results.keys():
                         results[ds.name]["columns"].extend([i for i in range(ini, end)])
                         if stage_id not in results[ds.name]["stage_ids"]:
-                            results[ds.name]["stage_ids"].append(stage_id)
+                            results[ds.name]["stage_ids"].extend([stage_id] * (end - ini))
                     else:
                         results[ds.name] = {
                             "columns": [i for i in range(ini, end)],
-                            "stage_ids": [stage_id],
+                            "stage_ids": [stage_id] * (end - ini),
                         }
                     i_col = end
         stages_columns_mapping: DatasetMappings = []
