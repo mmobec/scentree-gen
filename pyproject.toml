@@ -25,7 +25,10 @@ keywords = [
     "stochastic-programming",
 ]
 classifiers = [
-    "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)"
+    "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
 ]
 requires-python = ">=3.12"
 dependencies = [
@@ -48,6 +51,11 @@ dev = [
     "pdbpp>=0.11,<0.12",
     "twine>=6.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/mmobec/scentree-gen"
+Repository = "https://github.com/mmobec/scentree-gen"
+Issues = "https://github.com/mmobec/scentree-gen/issues"
 
 [tool.setuptools]
 include-package-data = true
