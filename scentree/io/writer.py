@@ -6,6 +6,7 @@ from numpy.typing import NDArray
 from pathlib import Path
 from scentree.io import DatasetMappings
 from scentree.tree_construction import ScenarioTrees
+from tqdm.auto import tqdm
 from typing import List, Union
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,12 @@ def save_json(
         counter += 1
     new_dir.mkdir()
     data = []
-    for i in range(len(scenario_trees)):
+    iterator = tqdm(
+        range(len(scenario_trees)),
+        desc="Writing files",
+        disable=False,
+    )
+    for i in iterator:
         current_scenario_tree = scenario_trees[i]
         current_data = current_scenario_tree["scenario_tree_data"]
         current_tree = current_scenario_tree["tree"]
