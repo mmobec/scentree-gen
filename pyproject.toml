@@ -50,12 +50,17 @@ dev = [
     "mypy>=1.8,<2",
     "pdbpp>=0.11,<0.12",
     "twine>=6.0",
+    "validate-pyproject>=0.24",
 ]
 
 docs = [
     "mkdocs>=1.5,<2",
     "mkdocstrings[python]>=0.25,<1",
     "mkdocs-material>=9,<10",
+]
+
+test = [
+    "pytest>=8",
 ]
 
 [project.urls]
