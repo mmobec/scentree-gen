@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 def save_json(
     output_dir: Union[str, Path],
     num_stages: int,
-    in_sample_prediction: bool,
     predicted_value: List[NDArray],
     observed_value: Union[List[NDArray], None],
     scenario_trees: ScenarioTrees,
     mapping_datasets_columns: DatasetMappings,
+    in_sample_prediction: bool = True,
     multiple_files: bool = False,
 ) -> None:
     """
@@ -31,7 +31,6 @@ def save_json(
     Args:
         output_dir (Union[str, Path]): Directory where results will be saved.
         num_stages (int): Number of stages in the scenario model.
-        in_sample_prediction (bool): Whether predictions are in-sample.
         predicted_value (List[NDArray]): List of predicted value arrays,
             one per tree.
         observed_value (Union[List[NDArray], None]): List of observed values,
@@ -40,6 +39,8 @@ def save_json(
             scenario tree.
         mapping_datasets_columns (DatasetMappings): Mapping between dataset names,
             their column indices and their stages.
+        in_sample_prediction (bool): Whether predictions are in-sample.
+            Default to true.
         multiple_files (bool): If True, results are saved in separate files
             (not yet implemented). If False, all results are stored in a
             single JSON file.
