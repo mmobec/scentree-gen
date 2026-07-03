@@ -7,7 +7,7 @@ name = "scentree"
 version = "0.0.1"
 description = "A Python package to generate scenario trees for multi-stage stochastic programming problems."
 readme = {file = "README.md", content-type = "text/markdown"}
-license = {file = "LICENSE"}
+license = "EUPL-1.2"
 authors = [
     {name = "Cristian Pachón García", email = "cristian.pachon@upc.edu"},
     {name = "Albert Solà Vilalta", email = "albert.sola.vilalta@upc.edu"},
