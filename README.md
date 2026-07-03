@@ -16,7 +16,7 @@ pip install scentree
 The package will be available on conda-forge soon.
 
 # How to use it
-Visit [the official documentation page] (https://scentree.readthedocs.io/en/latest/) for more details on how to use it.
+Visit [the official documentation page](https://scentree.readthedocs.io/en/latest/) for more details on how to use it.
 
 # Citation
 ```bibtex

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scentree"
-version = "0.0.2"
+version = "0.0.3"
 description = "A Python package to generate scenario trees for multi-stage stochastic programming problems."
 readme = {file = "README.md", content-type = "text/markdown"}
 license = {file = "LICENSE"}
