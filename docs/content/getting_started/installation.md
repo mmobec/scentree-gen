@@ -5,8 +5,8 @@ pip install scentree
 
 Alternatively, the package can also be installed directly from the source code:
 ```bash
-git clone https://github.com/mmobec/scentree-gen.git
-pip install ./scentree-gen
+git clone https://github.com/mmobec/scentree.git
+pip install ./scentree
 ```
 
 The package will be available on conda-forge soon. 

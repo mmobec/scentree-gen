@@ -1,4 +1,4 @@
-![Scentree logo](https://raw.githubusercontent.com/mmobec/scentree-gen/main/docs/assets/card.svg)
+![Scentree logo](https://raw.githubusercontent.com/mmobec/scentree/main/docs/assets/card.svg)
 
 # About
 
